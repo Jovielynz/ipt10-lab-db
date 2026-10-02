@@ -2,52 +2,54 @@
 
 require_once 'config.php';
 
-$sql = 'SELECT id, first_name, last_name, email, enrolment_date
-        FROM students
-        ORDER BY enrolment_date DESC, id DESC';
-
-$rows = $pdo->query($sql)->fetchAll();
+$stmt = $pdo->query('SELECT * FROM students ORDER BY created_at DESC');
+$students = $stmt->fetchAll();
 
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Records</title>
+    <title>Student Records - PDO</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>All Student Records</h2>
+<h2>Student Records - PDO</h2>
 
-<a href="create.php">Add New Student</a>
+<?php if (isset($_GET['deleted']) && $_GET['deleted'] === '1'): ?>
+    <p>Student deleted successfully!</p>
+<?php endif; ?>
 
-<table border="1" cellpadding="8">
-    <thead>
+<p>
+    <a href="create.php">Add Student</a>
+</p>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Student Number</th>
+        <th>Program</th>
+        <th>Actions</th>
+    </tr>
+
+    <?php foreach ($students as $student): ?>
         <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Enrolled</th>
-            <th>Actions</th>
+            <td>
+                <?= htmlspecialchars($student['first_name'] . ' ' . $student['middle_name'] . ' ' . $student['last_name']) ?>
+            </td>
+            <td><?= htmlspecialchars($student['email']) ?></td>
+            <td><?= htmlspecialchars($student['student_number']) ?></td>
+            <td><?= htmlspecialchars($student['program']) ?></td>
+            <td>
+                <a href="view.php?id=<?= urlencode($student['id']) ?>">View</a>
+                <a href="edit.php?id=<?= urlencode($student['id']) ?>">Edit</a>
+                <a href="delete.php?id=<?= urlencode($student['id']) ?>">Delete</a>
+            </td>
         </tr>
-    </thead>
+    <?php endforeach; ?>
 
-    <tbody>
-        <?php foreach ($rows as $row): ?>
-            <tr>
-                <td><?= htmlspecialchars($row['id']) ?></td>
-                <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></td>
-                <td><?= htmlspecialchars($row['email']) ?></td>
-                <td><?= htmlspecialchars($row['enrolment_date']) ?></td>
-                <td>
-                    <a href="view.php?id=<?= urlencode($row['id']) ?>">View</a>
-                    <a href="edit.php?id=<?= urlencode($row['id']) ?>">Edit</a>
-                    <a href="delete.php?id=<?= urlencode($row['id']) ?>">Delete</a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </tbody>
 </table>
 
 </body>

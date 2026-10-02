@@ -108,25 +108,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     enrolment_date = ?
                 WHERE id = ?';
 
-        $stmt = $pdo->prepare($sql);
+        try {
 
-        $stmt->execute([
-            $first_name,
-            $middle_name,
-            $last_name,
-            $birthday,
-            $sex,
-            $email,
-            $student_number,
-            $program,
-            $enrolment_date,
-            $id
-        ]);
+            $pdo->beginTransaction();
 
-        if ($stmt->rowCount() === 1) {
-            echo '<p>Student updated successfully!</p>';
-        } else {
-            echo '<p>No changes were made.</p>';
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                $first_name,
+                $middle_name,
+                $last_name,
+                $birthday,
+                $sex,
+                $email,
+                $student_number,
+                $program,
+                $enrolment_date,
+                $id
+            ]);
+
+            $pdo->commit();
+
+            if ($stmt->rowCount() === 1) {
+                echo '<p>Student updated successfully!</p>';
+            } else {
+                echo '<p>No changes were made.</p>';
+            }
+
+        } catch (PDOException $e) {
+
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            die('Unable to update student.');
         }
     }
 }
@@ -147,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>First Name:</label><br>
     <input type="text" name="first_name" value="<?= htmlspecialchars($first_name) ?>">
+
     <?php if (isset($errors['first_name'])): ?>
         <p style="color:red;"><?= htmlspecialchars($errors['first_name']) ?></p>
     <?php endif; ?>
@@ -160,6 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>Last Name:</label><br>
     <input type="text" name="last_name" value="<?= htmlspecialchars($last_name) ?>">
+
     <?php if (isset($errors['last_name'])): ?>
         <p style="color:red;"><?= htmlspecialchars($errors['last_name']) ?></p>
     <?php endif; ?>
@@ -168,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>Birthday:</label><br>
     <input type="date" name="birthday" value="<?= htmlspecialchars($birthday) ?>">
+
     <?php if (isset($errors['birthday'])): ?>
         <p style="color:red;"><?= htmlspecialchars($errors['birthday']) ?></p>
     <?php endif; ?>
@@ -189,6 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>Email:</label><br>
     <input type="email" name="email" value="<?= htmlspecialchars($email) ?>">
+
     <?php if (isset($errors['email'])): ?>
         <p style="color:red;"><?= htmlspecialchars($errors['email']) ?></p>
     <?php endif; ?>
@@ -197,6 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>Student Number:</label><br>
     <input type="text" name="student_number" value="<?= htmlspecialchars($student_number) ?>">
+
     <?php if (isset($errors['student_number'])): ?>
         <p style="color:red;"><?= htmlspecialchars($errors['student_number']) ?></p>
     <?php endif; ?>
@@ -205,6 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>Program:</label><br>
     <input type="text" name="program" value="<?= htmlspecialchars($program) ?>">
+
     <?php if (isset($errors['program'])): ?>
         <p style="color:red;"><?= htmlspecialchars($errors['program']) ?></p>
     <?php endif; ?>
@@ -213,6 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>Enrolment Date:</label><br>
     <input type="date" name="enrolment_date" value="<?= htmlspecialchars($enrolment_date) ?>">
+
     <?php if (isset($errors['enrolment_date'])): ?>
         <p style="color:red;"><?= htmlspecialchars($errors['enrolment_date']) ?></p>
     <?php endif; ?>

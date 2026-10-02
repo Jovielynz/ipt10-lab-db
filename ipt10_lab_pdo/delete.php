@@ -19,16 +19,29 @@ if (!$student) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $stmt = $pdo->prepare('DELETE FROM students WHERE id = ?');
-    $stmt->execute([$id]);
+    try {
+        $pdo->beginTransaction();
 
-    if ($stmt->rowCount() === 1) {
-        echo '<p>Student deleted successfully!</p>';
-        echo '<a href="index.php">Back to Students</a>';
-        exit;
+        $stmt = $pdo->prepare('DELETE FROM students WHERE id = ?');
+        $stmt->execute([$id]);
+
+        if ($stmt->rowCount() === 1) {
+            $pdo->commit();
+            header('Location: index.php?deleted=1');
+            exit;
+        }
+
+        $pdo->rollBack();
+        echo '<p>Student not found.</p>';
+
+    } catch (PDOException $e) {
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        die('Unable to delete student: ' . $e->getMessage());
     }
-
-    echo '<p>Student could not be deleted.</p>';
 }
 
 ?>
